@@ -29,12 +29,17 @@ def gather(startdate, enddate):
     historicaldata = []
     counter = 1
 
+    print('%d coins found' % len(names))
     for coin in names:
         r  = requests.get("https://coinmarketcap.com/currencies/{0}/historical-data/?start={1}&end={2}".format(coin, startdate, enddate))
         data = r.text
         soup = BeautifulSoup(data, "html.parser")
         table = soup.find('table', attrs={ "class" : "table"})
-        
+
+        if not table:
+            print()
+            print('<table> not found in results for coin %s. Skipping.' % coin)
+            continue
         #Add table header to list
         if len(historicaldata) == 0:
             headers = [header.text for header in table.find_all('th')]
@@ -62,6 +67,7 @@ def Save(headers, rows):
         writer = csv.writer(f)
         writer.writerow(headers)
         writer.writerows(row for row in rows if row)
+    print()
     print("Finished!")
 
 if __name__ == "__main__":
